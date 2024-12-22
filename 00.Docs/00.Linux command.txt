@@ -1,0 +1,1363 @@
+wc : print newline, word, and byte counts for each file
+1> : stdout
+2> : stderr
+2>&1: Stderr is being redirected to the current stdout (stdout of the subshell)
+du : Summarize disk usage of the set of FILEs
+
+echo //0[1-2]/.xlsx *//0[1-2]/*.pdf
+=> Use Globbing to match excel and pdf files in Jan and Feb
+
+=============================================================
+		Chapter 9: Pipes - Data Processing through command chaining
+
+# The pipe is a mechanism that passes the output of one command 
+as input to another command
+
+du -h file1.txt filenotexist.txt > /dev/null | wc -l
+
+tee : With the combination of a pipe and the tee command you can 
+create a standard output and write it to a file at the same time
+
+ping google.com 2>&1 | tee ping.txt
+==> Export ping result to txt file include stdout and stderr
+
+sort : sort the contents in a file or stdin
+uniq : only checks for consecutive(!) lines with the same 
+content
+
+sort file1.txt  | uniq  -d
+==> Find duplicate lines
+cat file1.txt | sort | uniq -d
+
+#Grep is a tool that can find a pattern in an output or a file
+cut -d '"' -f2 access.log | cut -d ' ' -f2 | grep .zip | sort | uniq | wc -l
+
+==========================================================================
+	Section 10: Enviroment Variables - Manage your Shell configuration
+	
+  > cat hello_world 
+#!/usr/bin/python3
+print("Hello world!!!")
+==> Add execute app to be Python to run "hello_world" command.
+
+PATH="${PATH}:/home/jayce/bin"
+==> Add path to the executable command.
+
+***NOTE***: Add above command to the ".bashrc" file to run everytime new bash open
+
+===========================================================================
+	Project: Colorful bash prompt
+
+echo -e "\e[1m\e[36mboldtext\e(B\e[mnormaltext"
+==> Print "boldtext" in bold, color format and "normaltext" in normal format
+
+echo "$(tput bold)$(tput smul)bold underlined text...$(tput sgr0)nomal text"
+==> Print "boldtext" in bold, underlined format and "normaltext" in normal format
+
+echo "$(tput bold)$(tput smul)$(tput setaf 4)$(tput setab 4)bold underlined text...$(tput sgr0)nomal text"
+==> Same above but whith color.
+
+for i in {0..15}; do echo "$(tput setab ${i}) color: ${i}$(tput sgr0)"; done
+==> Script to export formal color.
+
+
+PS1="\[$(tput setaf 7)\]→ \[$(tput setaf 6)\]\W \[$(tput setaf 3)\](\t)\[$(tput setaf 7)\]$ \[$(tput sgr0)\]"
+ ==> Customize shell prompt terminal.
+
+tput cup 6 50
+==> Bring the cursor to the columns 50 of line number 6.
+
+==========================================================================
+	Section 11: Shell Expansion
+
+echo "${#PATH}"
+==> Print number of variable in bytes.
+
+echo "${PATH:20:40}"
+==> Print path from echo "${PATH:begin:length}" position
+
+echo "${HOME//home/Users}"
+==> Print "Home" path and replace "home" to "Users" (NOT replace the $HOME variable)
+
+touch ./-al 
+==> Verify that the "-al" is in current dir "./" but not argument
+
+ls ./*
+==> To seperate "-al" is a file name but not an argument
+*NOTE: Always use double quotes for variables.
+
+echo ${PWD// /}
+==> Remove all space characters from the value of the variable
+
+
+					<< Escaping >>
+cat a\ file.txt
+==> To autocomplete a file name include white space "a file.txt"
+
+echo "\""
+echo '"'
+==> To print single double quote
+
+					<< Brace expansion >> 
+touch data.{txt,csv}
+==> Create "data.txt" and "data.csv" file
+
+touch file{1..5}.txt
+==> Create multiple txt file (CANNOT USE IN QUOTES)
+
+					<< Command substitution >>
+					
+echo 'there'"'"'re' "$(ls | wc -l)" 'files in the current directory'
+==> Export how many files in the directory
+
+wc -l < <(ls folder1)
+==> Redirect the "folder1" ls result as the input of "wc" command
+
+echo 'test' > >(cat)
+==> Redirect the 'test' value to the input of cat command but "cat" still execute seperately.
+
+#######################################################################################################
+						PART 3: LINUX
+#######################################################################################################
+
+					<< Symblink >>
+ln -s Desktop/ asd
+==> Link "Desktop" folder to the folder name "asd"
+
+					<< Hardlink >>
+cp -al Desktop/ restructured
+==> Make a hardlink of Desktop file by using function "-l"
+
+df -ih
+==> Show how many inodes are being used.
+
+echo "hello there" > pts/0
+==> Print the "hello there" string to the tty0
+
+cat /proc/cpuinfo
+==> Display cpu infor
+
+cat /proc/meminfo
+==> Display cpu memory infor
+
+cat /proc/version
+==> Display version infor about the kernel
+
+cat /proc/uptime
+==> Display uptime
+
+cat /proc/loadavg
+==> Display load averages for past 1, 5 and 15 mins
+
+==========================================================================
+	Section 16: User management
+	
+useradd -m -d /home/shakai shakai
+=> Add user and create home directory
+
+passwd -S jayce
+=> Display password status
+
+passwd -n 3 -x 90 shakai
+=> Change minimum time to change PW again to 3 and maximum expiration PW day to 90
+
+passwd -S shakai
+=> Check PW status of user Shakai
+
+sudo usermod -s /bin/bash -c 'Bác Kai' shakai
+=> Change default shell to bash shell and description name 
+
+chsh -s /bin/bash
+=> Change default shell by user
+
+sudo userdel -r -f shakai 
+=> 
+► -r:
+► Removes the home directory + mails
+► -f:
+► Also removes home directory + mails
+► Forces the removal of the user, even if the user is still logged in
+► Might also delete a group with the same name as this user
+(depending on system configuration)
+
+groups jayce
+=> Display all group related to user. If not specify username, display all groups
+
+* Existing groups on Ubuntu:
+
+► root: The superuser group with administrative privileges, allowing 
+complete control over the system.
+► sudo / wheel: Members can use sudo. May also be called "wheel".
+► adm: Allows members to read log files
+► lpadmin / lp: Members may manage printers and print queues 
+(CUPS). May also be called "lp"
+► www-data: A group for web server processes (such as Apache or 
+Nginx), gives access to web content
+► plugdev: Allow this user to manage pluggable devices (USB sticks, 
+external HDDs,...
+
+usermod [options] username
+=>
+► Manage groups:
+► -g: Change primary group
+► -G: Change secondary groups
+► -aG: Add secondary group
+► Depending on the system, we might also be able to use 
+
+additional tools:
+adduser [user] [group]
+deluser [user] [group]
+=> Add/Remove group for user
+
+====== Create own groups ===========
+
+groupadd [options] groupname
+► Important option:
+► -g: option to set custom GID
+► Example: groupadd -g 1005 newgroup
+► The group info is then stored in the /etc/group file
+
+====== Modify groups ===========
+groupmod [options] groupname
+► Important option:
+► -n: Change the name of the group
+► -g: Change the group Id (GID)
+► This will then update /etc/group and /etc/passwd
+
+====== Delete groups ===========
+groupdel groupname
+► Important:
+► This command does not delete group-owned files
+► This command will update /etc/group and /etc/passwd
+► This will fail, if this group is the primary group of a user
+
+su [other-user]
+=> Switch to another user
+
+===== Temporary change priviledges: sudo =======
+
+► Example, gives the user "shakai" full sudo access:
+► shakai ALL=(ALL:ALL) ALL
+► Example, gives the group "shakai" full sudo access:
+► %shakai ALL=(ALL:ALL) ALL
+
+sudo -k
+=> Expire the session with root previledge.
+
+sudo -s
+su root
+=> Start shell with additional previledge
+
+===== sudo into a different user ======
+► sudo -u [user] -g [group]
+sudo -u shakai bash
+sudo su shakai
+► This would start the program "bash" as the user shakai
+
+=== Advanced sudo: /etc/sudoers ====
+
+shakai ALL=(ALL:ALL) ALL
+► shakai: The username, this rule should be applied to this user
+► ALL: The hostname that this rule should apply to
+► (ALL:ALL): The run configuration
+► The first ALL: The user that the user shakai can sudo into
+► The second ALL: The group that the user shakai can sudo into
+► If we don't specify this, we can only sudo into the root user
+► ALL: The command specification, ALL means any command
+► sudo without password?
+► We can also specify NOPASSWD:, to allow sudo without a password 
+(potential security risk):
+► shakai ALL=(ALL:ALL) NOPASSWD: ALL
+
+@includedir /etc/sudoers.d
+=> Extent the file with file in the "sudoers.d" directory
+=> Create shakai file inside "sudoers.d" to extend the suoders
+
+shakai ALL=(ALL:ALL) NOPASSWD: /usr/bin/apt-get
+=> Allow shakai to use only the apt-get program without password
+
+which apt-get
+=> Find the path of the program
+
+=== File permissions in Linux ===
+
+ Why do we need file permissions?
+► Control access to files and directories
+► Determine who can read, write and execute those files
+► There're 3 important levels of permissions:
+► Owner (u) 
+► Group (g)
+► Others (o) 
+
+	1. Type of permissions
+ Type of permissions:
+► Read (r / 4): 
+► Allows viewing file contents or listing directory contents
+► Write (w / 2): 
+► Allows modifying file contents or creating / deleting files in a directory
+► Execute (x / 1): 
+► Allows running a file as a program or accessing a directory's contents
+	2. Assign permissions to a file
+Permission levels: Owner (u), group (g), others (o)
+► Type of permissions: Read (r / 4), write (w / 2), execute (x / 1)
+► How do we assign permissions to a file?
+► We can use the chmod command for this
+► Examples:
+chmod u+x file.txt
+► Would give the owner (u) executable rights
+chmod g-w file.txt
+► Would remove the write permission for the group(g)
+chmod o+r file.txt
+► Would give other users (o) read access to this file or directory
+
+	3. Change owner/group of a file
+We can also change the owner / group of a file:
+chown user:group file.txt
+► This sets the owner to "user", and the group to "group"
+► Let's see how this works 
+
+sudo chmod g+w permission.txt
+=> Give the group permission to write the file.
+
+sudo chown jayce permissions.txt
+=> Change the owner of the file to Jayce
+
+	3. chmod 777
+► Permission levels: Owner (u), group (g), others (o)
+► Type of permissions: Read (r / 4), write (w / 2), execute (x / 1)
+► How do we assign permissions to a file?
+► We can use the chmod command for this
+► Examples:
+► chmod 754 file.txt
+► First digit is for the owner:
+► 7 = 4 + 2 + 1 => read, write, execute
+► Second digit is for the group:
+► 5 = 4 + 1 => read, execute
+► Third digit is for all others:
+► 4 => Read
+
+	4. File permissions (directory)
+File permissions for directories:
+► Read (r): Access directory contents
+► Write (w): Add or remove files
+► (we also need execute permissions for this though)
+► Execute (x): Enter and traverse directory
+
+	5. Changing the permission
+chmod 777 test/ -R
+=> Change the directory permission and all its recursive
+
+chown shakai:jayce test/ -R
+=> Change the owner of directory "test" and its recursive to user shakai and group jayce
+
+	6. Advanced file permission: umask
+How does it work?
+► We have some base permissions
+► And from those, we subtract the umask value (technically: we apply a 
+bitmask according to the binary representation of our umask value)
+► Base permissions are usually: 
+► 777 for directories, 666 for files
+► If we set the umask to 022:
+► Directories will have 755
+► Owner: read + write + execute
+► Group and others: read + execute (but not write)
+► And files will be 644:
+► Owner: Read + Write
+► Group and others: read (but not execute + write)
+► We can show the current umask value: umask
+
+	7. How to change umask?
+► Temporarily change it (shell session):
+► umask [new umask]
+► Permanently change it (for shell):
+► We can add the umask command to one of the startup files our bash 
+(Example: ~/.bashrc)
+► Permanently change it (for all programs):
+► Usually, we can edit this in the following file:
+► /etc/login.defs
+► This should then also affect new GUI sessions!
+► Be aware:
+► Changes umask command in a shell overwrite this for the current 
+shell session
+► Those changes should usually be applied automatically during 
+startup - if a new shell doesn't pick them up, be sure to make sure 
+the umask is not overwritten during startup of the shell
+==> umask is saved in the /etc/login.def file
+
+	8. Advanced file permission: Sticky bit
+The sticky bit is an extra bit that we can set for all files or 
+directories
+► It has different meaning:
+► For files:
+► Obsolete, no longer used
+► It used to indicate that an executable file can remain in 
+memory, to be loaded more quickly on next launch
+► For directories:
+► Without the sticky bit, any user with write + execute 
+permissions for a directory can rename / delete files in it
+► If the sticky bit is set, only the owner (and root) of a file or the 
+directory owner can rename or delete a file
+► The sticky bit is especially used for the /tmp folder
+
+chmod +t [folder]
+► Or in octal notation:
+► Set sticky bit: chmod 1777 [folder]
+► Unset sticky bit: chmod 0777 [folder]
+► How can we inspect the sticky bit?
+► We can use the ls -l command for this:
+► ls -l 
+► If the sticky bit is set:
+► If the file / directory also has executable permissions for others:
+► Last character will be a "t" 
+► Otherwise, the last character will be a "T"
+
+	9. Advanced file permission: SUID/SGID
+► What is the SUID?
+► SUID = Set User ID
+► The Idea:
+► We can set a special bit for executable files
+► If this bit is set:
+► The executable will gain the rights of the owner
+► This allows unprivileged users to access privileged resources
+► Be careful:
+► This can be a major security issue if used improperly
+► On most systems, the SUID bit is limited to executable binary files
+► It is usually not supported for executable scripts (.sh, .py,...)
+► If we set it on our own programs, we can easily create major 
+security vulnerabilities. Be extremely careful!
+► How can we inspect the SUID bit?
+► ls -l file
+► Example:
+► -rwsrwxrwx
+► Lowercase s: SUID bit + execute bit
+► Uppercase S: SUID bit, but without execute bit
+► We can also set the SUID bit:
+
+chmod u+s file
+► Important:
+► We should also limit write access to this file as much as possible
+
+► We can give additional privileges based on the group
+► This is the SGID: Set Group ID
+► Example:
+► ls -l file
+► -rwxrwsrwx
+► It works the same as for the SUID:
+► Lowercase s: SGID bit + execute bit
+► Uppercase S: SGID bit, but without execute bit
+► We can also set the SGID bit:
+► chmod g+s file
+
+==========================================================================
+	Section 16: Linux processes - Orchestrate System Operation
+
+=== The program: ps ===
+
+ps -A, ps -e
+► Show all processes, from all users and all sessions
+ps -f
+► Full-format listing: Show extended information, such as user, terminal, 
+and parent process (PPID)
+ps -p 1234,1235
+► Show processes with process ID 1234 and 1235
+► We are also allowed to omit (leave out) the -p, and even the comma:
+ps 1234 1235
+ps --forest
+► Only Linux: Show the processes as an ASCII tree
+ps -l
+► Show entries in long format (a few more columns)
+
+=== BSD style parameters for ps ===
+► ps aux / ps a u x
+► ps a:
+► Show all processes of all users
+► ps u:
+► Displays the information in a more user-oriented format 
+(additional columns) 
+► ps x:
+► Show processes without a tty (=processes outside of a terminal)
+
+=== Multitasking ===
+► cat /proc/[process ID]/status | grep ctxt
+► cat /proc/12345/status | grep ctxt
+► We can use the watch command:
+► This allows us to automatically re-execute a command
+► Here: Refresh the output every 0.5 seconds
+► watch -n 0.5 grep ctxt /proc/12345/status
+
+=== Niceness ===
+► nice -n [niceness] [program]:
+► Sets the niceness to [niceness] for a program (lower priority 
+than default)
+► Example:
+► nice -n 19 gedit
+► We can also change the priority of an existing process:
+► renice -n 19 [process ID]
+
+ps -ef | grep -F 'background_process.sh'
+► But we will also get additional output :/
+► How can we only get the process ID?
+► We can use the pgrep program!
+► This allows us to search in our programs
+► And it only returns the process ID(s)!
+► pgrep background_process.sh
+► Why is it so useful that we need a special tool?
+► Reason: We can combine it with expansions!
+► renice -n 19 $(pgrep background_process.sh)
+
+===== The kill command =====
+► Important:
+► The program is just called kill...
+► But all it does is to send signals to programs
+► How do we send a SIGINT with kill?
+► kill -s [SIGNAL] [process-ID]
+► We first need to get the process ID of the process we 
+would like to send the SIGINT to
+► And then we can send the signal to the process:
+► kill -s SIGINT 12345
+► kill -SIGINT 12345
+
+kill -s SIGINT $(pgrep wget)
+=> Send INTERUPT signal to the wget program
+
+==== Additional signals, SIGTERM, SIGKILL =====
+kill -l 
+=> List all the signal names
+
+	1. SIGTERM
+Is used to tell the process that it should terminate
+► We can imagine the meaning like this:
+► Hey process, would you please come to an end? If you can't 
+that's totally alright as well, just please try to come to an end
+► We can send this signal the following ways:
+► kill [process ID]
+► kill -s SIGTERM [process ID]
+► kill -s 15 [process ID]
+► kill -SIGTERM [process ID]
+► kill -15 [process ID]
+	
+	2. SIGINT
+► SIGTERM tells the process to terminate
+► SIGINT tells the process to terminate, because we're in a shell and we 
+would like to regain control immediately
+
+======= The signal: SIGKILL =========
+► SIGTERM and SIGINT could be ignored from our program - it's up to the 
+program to handle those
+► How to we kill a process?
+► We send the SIGKILL signal!
+► This forcefully terminates the program
+► Be careful:
+► This may cause data loss
+► Files might not have been written completely, or might be in an 
+inconsistent state
+► This signal is unique: 
+► It is not handled by the process, but by the kernel
+► The program isn't even informed that there's a SIGKILL event
+► We can send this signal the following ways:
+► kill -s SIGKILL [process ID] / kill -SIGKILL [process ID]
+► kill -s 9 [process ID] / kill -9 [process ID]
+
+kill -s SIGTERM $(pgrep vim)
+=> Send KILL signal to the vim program
+
+======= Additional signals: SIGHUP, SIGSTOP, SIGCONT =========
+
+	1. The signal: SIGHUP
+► The SIGHUP signal is used to communicate that the terminal has 
+been closed
+► The program then usually exists
+► For daemons (background processes):
+► It may also mean that the program should reload its 
+configuration
+► We can also send a SIGHUP ourselves:
+► kill -s SIGHUP [process ID]
+
+	2. The signal: SIGSTOP
+► The signal: SIGSTOP
+► The process is being put into a stopped state (=paused)
+► Non-catchable, the process can't ignore it
+► We can later resume the process again (with SIGCONT) 
+► We can also send a SIGSTOP ourselves:
+► kill -s SIGSTOP [process ID]
+► Let's test this with 2 programs:
+► cmatrix
+► Wget
+► You might have to install them:
+► sudo apt-get install cmatrix wget
+► brew install cmatrix wget
+► On CentOS:
+► sudo yum install wget
+► We can send this signal to a process to resume it again
+► Example:
+► We had stopped a process before (for example, with SIGSTOP)
+► And now we want to resume it
+► kill -s SIGCONT [process ID]
+
+======== kill vs. /usr/bin/kill vs. /bin/kill ==========
+
+► A lot of commands exists twice: 
+► one time as a shell build-in,
+► and one more time as an executable file
+► We can check this:
+► type kill
+► Output:
+► kill is a shell builtin
+► What does this mean?
+► The shell is providing this functionality
+► When we call the kill command, we are not calling the 
+executable file from the operating system
+► Why does it matter?
+► kill provides additional functionality and behaves differently than 
+the executable from the OS
+► Let's just compare those two
+► How do we find the executable from the OS?
+► We could manually investigate our PATH
+► Or let a program do this for us:
+► Bash: which kill
+► Zsh: where kill
+► It should usually be /usr/bin/kill (Linux) or /bin/kill (macOS)
+► Let's now compare: 
+► kill -l
+► /usr/bin/kill -l
+
+====== The killall command =======
+► We can also use the killall command for sending signals
+► The difference to kill is, that we select the process by name
+► Example:
+► killall firefox
+► How do we send a SIGINT with killall?
+► killall -s [SIGNAL] [process-name]
+► macOS:
+► If we're on macOS, -s has a different meaning - it will make the 
+program more verbose and prevent any signal from being sent
+► We can only use the following syntax there:
+► killall -SIGINT firefox
+Jannis Seemann 
+
+======= What happens when a process exits? =======
+► First, most of the resources are made available again
+► Parent Process:
+► Child Termination: 
+► When a child process terminates, the kernel sends a SIGCHLD 
+signal to the parent
+► The parent can then retrieve the child's exit status
+► Process Reaping: 
+► The parent process uses a system call (wait() or waitpid()) 
+to collect the child's exit status
+► This action is known as "reaping" the child process
+► In a Bash, we can access the child's exit code: $? (more on 
+those later)
+► Orphan Process: 
+► If the parent process ends before the child, the child becomes 
+an orphan and is adopted by the init process
+
+======== Zombie process ============
+► Zombie Process:
+► Definition: A zombie process is a process that has finished 
+executing but still has an entry in the process table
+► This usually occurs when the parent process hasn't read the child's 
+exit status (yet)
+► Characteristics: 
+► Zombies can lead to process table overflow
+► They are marked as "Z" in the output of ps -l
+► Removal: 
+► When the parent process ends:
+► They're usually removed automatically
+► If not, they can be manually reaped:
+► We can send a SIGCHLD signal to their parent
+► Or we can kill the parent process:
+► Then, the init process will adopt this process, and reap it
+
+====== Important parameters for top ======
+► The most important parameters are:
+► -u [username]: Show only processes owned by the specified 
+user
+► -d [seconds]: Set the delay between display updates, in 
+seconds. The default value is 3 seconds
+► -i: Start top with the "idle" processes hidden. This shows only 
+the processes that are currently using CPU resources
+► -c: Display the full command line used to start each process, 
+instead of just the command name
+
+======= How to change the output of top? ==========
+► We can also interactively change the output:
+► f key: We can press the f key to further customize the output
+► k key: We can send signals to processes with this key (k = kill)
+► r key: We can change the niceness of processes
+► z key: We can switch to color mode, and with the uppercase Z 
+key, we can configure it
+► W key: Write the current configuration, so it is loaded the next 
+time we start top
+
+========================================================================================
+	Section 17: Job Control in Bash - Navigate Bcakground and Foreground Operations
+
+======== Background jobs in Bash ============
+► We can also start background jobs in Bash:
+► [command] &
+► Example: 
+► ping -c 10 google.com & 
+► The -c option limits the number of ping packets to 10
+► Because of the & symbol, the command will be started as a 
+background job
+► The output will still be displayed in the shell
+(unless we redirect it)
+► It will display the job ID and the process ID
+
+===== List running jobsL jobs ==========
+► ping is now running in the background
+► How can we see all the background jobs?
+► We can use the jobs command for this!
+► Command: 
+► jobs
+► Output: 
+► [1]+ Running ping -c 10 google.com &
+
+========= Job to foreground: fg ===========
+► fg [%job-ID]
+► For example:
+► fg %1
+► If there's just one job, it will automatically switch to 
+that, and we don't need to specify the job ID:
+► fg
+► If there're multiple jobs, it will switch to the current 
+job (marked with a + in the jobs table)
+
+=========== Send a job to the background ============
+► We can suspend the job: 
+► We enter the suspend character (usually: Ctrl + Z)
+► This internally sends a SIGTSTP signal to the programs 
+involved
+► SIGTSTP?
+► It's a nicer version of the SIGSTOP signal: It asks the program 
+to pause execution and return control to the terminal
+► A program could ignore it though
+► The job can be resumed later
+
+============ How can we resume the job? ==============
+► We can resume a job in the foreground:
+► fg %[job-ID]
+► We can also resume a job as a background job:
+► fg %[job-ID] &
+► bg %[job-ID]
+► When continuing:
+► A SIGCONT signal is sent to the program
+
+============ How can we kill a job? =============
+► We can kill a job with the kill command:
+► kill %[job-ID]
+► This will send SIGTERM to the job and will ask the job to 
+terminate itself
+► If this doesn't work, we could of course also send SIGKILL to 
+a job:
+► kill -s SIGKILL %[job-ID]
+
+============= Stop jobs with output =============
+► stty tostop
+► stty is a tool to change / print the terminal line settings
+► By setting the tostop option, we can tell it to suspend the job if 
+it creates any output
+► When we now start a background job it will only run until it 
+creates any output
+► Once it writes any output, the job will be suspended 
+immediately
+► To disable this feature again:
+► stty -tostop
+
+========== Waiting for jobs: wait ===========
+► The wait command:
+► With wait, we can wait for background jobs
+► wait
+► Waits until all currently running jobs have changed their state
+► wait 123
+► Waits for process with the ID 123
+► wait %1
+► Waits only for background job #1
+► wait -n
+► Waits for any job to be completed
+
+============ Keep a program running: nohup =========
+► nohup ping -c 100 google.com &
+► This will:
+► Start the program ping, which will be run in the background
+► It will keep running, even if we close our terminal (or log out)
+► The standard output will be redirected:
+► Usually to a file called "nohup.out" in the current folder
+► It may also be redirected into a "nohup.out" in the home 
+directory, if the current directory is not writable
+
+============ nohup vs. & =============
+► nohup ping -c 10 google.com
+► ping -c 10 google.com &
+► nohup ping -c 10 google.com &
+► nohup ping -c 10 google.com:
+► nohup disconnects the ping program from the SIGHUP signal. Ping 
+is still a foreground process
+► ping will remain running, even after the terminal has been closed
+► ping -c 10 google.com &:
+► ping is being launched as a background process for our current 
+terminal.
+► It will terminate when we close the terminal, because it still 
+receives the SIGHUP signal
+► nohup ping -c 10 google.com &:
+► nohup disconnects the program from the SIGHUP signal, thus it will 
+keep running if we close our terminal
+► It's a background process, so it will run in the background of our 
+current terminal
+
+==========================================================================
+	Section 18: Package Management with 'APT' & 'dpkg'
+	
+============ dpkg: Debian Package Manager ===============
+► dpkg: 
+► On the lowest level, dpkg is responsible for installing software 
+packages
+► Those packages are distributed as .deb files, and we can install 
+them through dpkg:
+► dpkg -i package.deb
+► A .deb file is a compressed archive (ar file format) with all the 
+files needed for the program, and its installation on the system
+► How do we get those software packages?
+► Later we will be able to get them automatically
+► But let's now get them manually
+
+============= Dependency management with apt ==========
+► dpkg was able to install .deb packages on our system
+► But we were not able to install dependencies through it
+► Thus, we need another tool, that builds on top of dpkg. We can 
+choose one of the following:
+► apt-get:
+► Stable API, we should use this when we're writing scripts
+► apt:
+► API and parameters might change when deemed necessary
+
+============= A package source / repository in apt ==========
+► apt-get / apt needs to know which packages are available, and 
+where it can download them from
+► We thus need to connect to central repositories, which provide 
+our packages
+► Those central repositories are stored in the following files:
+► Repositories from the system:
+► /etc/apt/sources.list
+► Additional (third party) repositories:
+► /etc/apt/sources.list.d/*
+► Important:
+► Those repositories provide a list with packages, their versions, ...
+► We must fully trust those repositories
+► They could even replace existing software on our system
+
+=============== Updating package definitions ===========
+► Once we have our repositories, we need to update the "package definitions"
+► This means, that we fetch the latest list of available packages from the 
+repositories
+► We can do this with the following command:
+► sudo apt update / sudo apt-get update
+► After this, we're able to install software on our system
+► If we want to install neofetch, we could now do it:
+► sudo apt install neofetch
+► This package is then installed - and all the dependencies (additional 
+packages) needed to execute neofetch
+► apt will remember, which package we installed manually, and which 
+packages were just installed as dependencies (important for later)
+sudo apt install --no-install-recommends neofetch
+=> Install neofetch pakage without dependencies
+
+=============== Managing upgrades ===============
+► We want to keep our system up to date
+► We thus want to install available updates on our system
+► How do we do this?
+► sudo apt upgrade
+► sudo apt-get upgrade --with-new-pkgs
+► What will this do?
+► This will install all available and possible updates - and even 
+install additional dependencies (if they become necessary)
+► It will never remove any packages from our system, even if 
+they're no longer needed
+
+============= Managing updates (full-upgrade / dist-upgrade) =============
+► If we want to have a bigger upgrade, we need to allow apt to 
+uninstall packages as well:
+► sudo apt full-upgrade
+► sudo apt-get dist-upgrade
+► This will:
+► Try to install all available and possible upgrades
+► Uninstall dependencies if this is required in order to install the 
+upgrade 
+► Example for this:
+► Package A depends on Package B (v1.0)
+► Package A is updated, now depending on Package C (v1.0), 
+which conflicts with Package B (v1.0)
+► Package B is uninstalled during dist-upgrade.
+
+========== Auto-removing packages ==============
+► full-upgrade / dist-upgrade only uninstalls dependencies, if 
+they're exclusive and need to be uninstalled
+► All other dependencies will remain installed, even if they're no longer 
+needed
+► To uninstall those, we need to execute the following command:
+► sudo apt autoremove
+► sudo apt-get autoremove
+
+========== How does the sources.list work? ============
+► The system reads the following file(s) for its repositories:
+► /etc/apt/sources.list
+► /etc/apt/sources.list.d/*
+► Let's just have a look at those files first
+► What's the syntax of the /etc/apt/sources.list?
+► deb http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted
+► <type> <uri> <distribution> <domain1> <domain2> ...
+► <type>:
+► deb: This repository contains binary packages
+► deb-src: This repository contains source packages
+► <uri>: The address of the repository
+► <distribution>: The ubuntu version, we want to download the packages for
+<domain>: Free software Non-free software
+Officially supported by 
+Canonical main restricted
+Community 
+supported/Third party universe multiverse
+
+=========== Custom repositories ==============
+ We can add additional repositories to our apt sources
+► If we were to do this manual: 
+► We create a new file in /etc/apt/sources.list.d
+► Usually: We need to add the GPG key to our system for this repository
+=> GPG key is a kind of signature so authors can sign it with a so-called private key
+We are download the public key with that allows to verify whether the packages and the sources come from the developer that we trusted.
+► This is needed so that our system trusts the third-party repository
+► Usually wherever you find an installation guide for this, they will 
+explain all the steps required
+► Important:
+► The third-party repository could install any software on our system
+► It could for example say: I got bash in version 100000 - and our 
+system would trust this and update it
+► Even if bash was installed from the official repository before
+
+======== Third party packages: ppa ==========
+► Personal Package Archive:
+► This will usually work only on Ubuntu, not on Debian systems
+► It's a website where users can easily provide repositories for others: 
+https://launchpad.net/ubuntu/+ppas
+► For example, for the latest php version, we could just add a ppa: 
+► sudo add-apt-repository ppa:ondrej/php
+sudo apt update
+► We would then have access to the latest php packages
+► To remove a ppa:
+► sudo add-apt-repository --remove ppa:ondrej/php
+► But:
+► We're installing a third party repository here
+► They could install any software on our system when we start a system 
+update / upgrade
+► We need to trust the authors, not just now but also in the future!
+
+======== Verifying installation: debsums ============
+► We can verify all packages that contain an md5 sum with the 
+command debsums:
+► debsums [package / .deb file]
+► We might have to install it first:
+► sudo apt install debsums
+► Important parameters:
+► -a: List all files (including configuration files)
+► -l: List packages, that don't have a list of files with their md5 sum
+► -s: Silent, only list errors
+
+========= Dependency management ==========
+► sudo apt show bash
+► sudo apt-cache show bash
+
+========= Conflict resolution =========
+► sudo apt install -f / sudo apt-get install -f
+► -f stands for "--fix-broken"
+► apt will analyze the current package state, identify 
+inconsistencies, and solve them by installing, upgrading or 
+removing packages
+► In 75%+ of the cases, this should resolve the problem (for 
+packages from the default repositories)
+
+========= Reconfiguring packages =============
+► sudo dpkg-reconfigure <package>
+
+========= Pakage management with snap ==========
+► snap install gimp
+=> Used to install app with dependencies bundled within
+
+==========================================================================
+	Section 19: Package Management with 'DNF' [CentOS]
+	
+======== The .rmp package format ===========
+► We can then inspect the .rpm file:
+► rpm -qpl [file].rpm
+► Or install the .rpm file manually:
+► rpm -i [file].rpm
+
+======== Package management on CentOS =============
+► We can use dnf to search for software:
+► dnf search [term]
+► And we can install software through it:
+► dnf install links
+► With this command, dnf will first install all the required dependencies, and 
+install the tool
+► And uninstall software:
+► dnf remove links
+
+======== Repositories: Where do our packages come from? =========
+► Let's say we want to install a tool:
+► dnf install gimp
+► How does DNF know where to download the software from?
+► This is what repositories are for!
+► How do they work?
+► We can define those repositories in the following files:
+► /etc/dnf/dnf.conf
+► /etc/yum.repos.d/*.repo
+► A full system of RHEL / CentOS needs at least:
+► BaseOS
+► AppStream
+► We don't have to refresh this index manually
+
+======== What are dependencies? ========
+► Each package:
+► Can provide certain features:
+► dnf repoquery --provides [package_name]
+► ... and also require certain features:
+► dnf repoquery --requires [package_name]
+► We can also use this to find packages:
+► We can also list which package provides a certain feature:
+► dnf repoquery --whatprovides 
+► We can also list which package requires a certain feature:
+► dnf repoquery --whatrequires
+► We can list the dependencies with the following command:
+► dnf deplist [program]
+
+======= What are weak dependencies? ========
+► Querying:
+► List recommended weak dependencies:
+► dnf repoquery --recommends [package_name]
+► Lists suggested weak dependencies:
+► (mostly for informational purposes)
+► dnf repoquery --suggests [package_name]
+► If we want to disable weak dependencies:
+► We can set this option in /etc/dnf/dnf.conf:
+► install_weak_deps=False
+► Or set is as a parameter when installing:
+► dnf install [package_name] --setopt=install_weak_deps=False
+► Supplements:
+► This package will be installed (as a weak dependency) if another 
+package is installed
+► dnf repoquery --supplements [package_name]
+► Of course, we can also check which package supplements 
+another one:
+► dnf repoquery --whatsupplements [package_name]
+► Enhances:
+► This package could enhance the functionality of another 
+package. But do not install by default
+► dnf repoquery --enhances [package_name]
+
+====== Types of backward weak dependencies =======
+► Supplements:
+► This package will be installed (as a weak dependency) if another 
+package is installed
+► dnf repoquery --supplements [package_name]
+► Of course, we can also check which package supplements 
+another one:
+► dnf repoquery --whatsupplements [package_name]
+► Enhances:
+► This package could enhance the functionality of another 
+package. But do not install by default
+► dnf repoquery --enhances [package_name]
+
+===== Automatic dependency uninstall =====
+► dnf automatically removes no longer needed dependencies
+► Let's have a look at an example:
+► python3-matplotlib
+► This tool has a dependency to python3-numpy (among many others)
+► Thus, when we install python3-matplotlib, python3-numpy is 
+installed as well
+► We can check that:
+► python3 -c 'import numpy as np'
+► This will work!
+► If we now uninstall python3-matplotlib:
+► The package python3-numpy is uninstalled as well
+► If our application would depend on numpy... it would now fail:
+► python3 -c 'import numpy as np'
+► How to avoid this?
+► We could set an option to False in /etc/dnf/dnf.conf:
+► clean_requirements_on_remove=False
+► And then we would have to remove old dependencies manually:
+► dnf autoremove
+► We could remove a package without its dependencies:
+► dnf remove [package] --noautoremove
+► We can mark packages as installed manually:
+► dnf mark install [package]
+
+====== DNF: Update packages: dnf upgrade =======
+► Of course, we want to keep our system up to date
+► For this, we can use the following command:
+► dnf upgrade
+► This will ensure the repository indexes are up to date
+(and refresh them if required)
+► And install all available updates
+► For this, we can use the following command:
+► dnf downgrade [package]
+► dnf downgrade [package-with-version]
+► Important:
+► We should never downgrade the following packages: dbus, 
+glibc, selinux-policy
+► We should never downgrade a system to a previous minor 
+version of CentOS / RHEL
+► Example: We should never downgrade from CentOS 9.2 to 
+9.1
+► We can list available versions:
+► dnf list [package] --showduplicates
+
+==== How to prevent upgrade ====
+► We can temporarily exclude it:
+► dnf upgrade --exclude=[package]
+► Or permanently exclude it in our /etc/dnf/dnf.conf:
+► excludepkgs=[packages]
+► Aside from this, there's also a plugin for dnf: 
+► dnf-versionlock
+► We will not have a look at this in this course 
+
+===== DNF: Automatically keep the system up to date ====
+► First, we need to install dnf-automatic:
+► sudo dnf install dnf-automatic
+► After this, we should have a look at the configuration file:
+► sudo nano /etc/dnf/automatic.conf
+► And we need to enable the timer:
+► sudo systemctl enable --now dnf-automatic.timer
+
+===== DNF: Modules =========
+► Listing available modules:
+► dnf module list
+► Enabling a module:
+► dnf module enable [name]
+► dnf module enable [name]:[stream]
+► We can also install the module directly:
+► dnf module install [name]
+► dnf module install [name]:[stream]/[profile]
+► dnf install @[name]:[stream]/[profile]
+
+===== Disabling and uninstalling a module =====
+► We can also remove installed module profiles:
+► This will uninstall the software that was installed through the profile
+► dnf module remove [--all] [name]
+► dnf module remove [name]/[profile]
+► The --all flag will uninstall all software that was provided by this module
+► We can also disable a module:
+► The software will remain installed
+► The module streams will become unavailable
+► dnf module disable [name]
+► We can also reset a module:
+► This will reset the stream & profile to the default
+► Software will not be uninstalled
+► sudo dnf module reset [name]
+
+====== How to enable epel-release ======
+► How to enable epel-release on CentOS Stream:
+► On CentOS stream, we should be able to just install the additional repositories:
+► dnf config-manager --set-enabled crb
+► sudo dnf install epel-release epel-next-release
+
+======= Package management with snap ======
+► First, we need to install snap:
+► EPEL must be activated for this! 
+► dnf install snapd
+► systemctl enable --now snapd.service
+► We can install an application: 
+► snap install firefox
+
+
+=== The bootloader: GRUB 2 =========
+► We can change the configuration of GRUB in the following file:
+► /etc/default/grub
+► To update the GRUB configuration, after each change we must run: 
+► On Ubuntu:
+► sudo update-grub
+► On CentOS:
+► sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+► This will update the /boot/grub/grub.cfg file (we should never edit this file 
+directly, as it would be overwritten during updates)
+
+==== The kernel =======
+==== Step 3: systemd =======
+====  Systemd manages "Units" ==== 
+► systemd searches units in various paths on our system
+► Those paths are usually:
+► /lib/systemd/system (sometimes also /usr/lib/systemd/system):
+► System configuration
+► This is the "default" place for configuration from the maintainer 
+(=authors of our Linux distribution / packages)
+► /run/systemd/system: 
+► Non-persistent, runtime configuration
+► /etc/systemd/system: 
+► Configuration for the adminsitrator
+► Overwrites files from /lib/systemd/system
+► This is where we should store our custom configuration
+► We could find those paths with the following CLI command:
+► systemd-analyze --system unit-paths
+
+========= How do we manage a unit? =========
+► We can manage a unit with the following commands:
+► Get the status of a unit:
+► systemctl status [unit]
+► Change the status of a unit:
+► systemctl {start, stop, restart, reload} [unit]
+► start: starts a unit, stop: stops a unit, restart: restarts a unit
+► reload: asks the unit to reload its configuration (important: this is not the 
+systemd configuration of this unit)
+► Example (apache2 needs to be installed for this):
+► systemctl start apache2.service
+► systemctl stop apache2.service
+► systemctl status apache2.service
+systemctl list-units 
+=> List all the unit
+
+======= What is a cgroup? ======
+► Show processes on our system:
+► systemctl status
+► If we want to inspect cgroups:
+► We can use the following command for this:
+► systemd-cgtop
+► By default, it displays up to 3 levels of cgroups
+► We can change this level:
+► --depth=5
+
+======= Cgroup example: Limit Firefox to 100MB RAM ======
+► As an example, can we limit Firefox to 100MB of memory?
+► First step: 
+► We need to create a systemd slice in our user account.
+Here, I call the slice "browser":
+► ~/.config/systemd/user/browser.slice:
+[Slice]
+MemoryHigh=100M
+► And after this, we can launch Firefox. If the Firefox executable is placed 
+at /usr/bin/firefox, the command is as follows:
+► systemd-run --user --slice=browser.slice /usr/bin/firefox
+► Important:
+► If the Firefox executable is a script... the script might change the 
+cgroup configuration
+► In this case, we need to find out the real path to the real executable 
+of Firefox
+
+======== systemd: Targets ======
+► Target:
+► Groups units logically to a goal
+► Managed by .target unit files
+► To get the (current) default target:
+► sudo systemctl get-default
+► To switch target, without rebooting:
+► sudo systemctl isolate multi-user.target
+► We can list available targets with the following command:
+► sudo systemctl list-units --type target --all
+► We could also change the current default target:
+► sudo systemctl set-default multi-user.target
+
+
+====== The unit config file =====
+► A config file for a unit of a service can consist out of several 
+sections: 
+► [Unit]: 
+► A general configuration for the unit
+► [Service]:
+► If this unit is a service, we should write all the configuration for 
+the service into this section
+► [Install]:
+► Here, we specify, how the unit should be installed
+► Let's have a look at this!
+
+====== How can we edit a unit? ======
+► We can copy the unit file from /lib/systemd/system to
+/etc/systemd/system
+► This will then take precedence over the original file in 
+/lib/systemd/system
+► After this, we need to inform systemd about those changes:
+► sudo systemctl daemon-reload
+
+► The easier way is to use build-in commands for this:
+► sudo systemctl cat apache2.service
+► This prints out the current configuration of apache2.service
+► sudo systemctl edit apache2.service
+► This allows us to easily edit the configuration
+► We can only override this with the changes that we did -
+we don't need to copy'n'paste the whole configuration
+► Internally, a new folder will be created:
+► /etc/systemd/system/apache2.service.d
+► From this folder, override files will be loaded, that can 
+change certain parts of the initial configuration
+
+===== Project: Let's launch our own program on boot! =====
+► This is quite simple:
+► We can create a file, for example my-network-log.service with the following 
+contents:
+[Unit]
+Description=Ping a server and log it
+Requires=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/usr/bin/date '+%%T' >> /var/log/ping.txt && /usr/bin/ping -c 4 google.com >> /var/log/ping.txt"
+
+[Install]
+WantedBy=multi-user.target
+
+====== Bonus: Timers with systemd =======
+► First, we need a service, that is disabled:
+► sudo systemctl disable my-network-log.service
+► Then, we can create a timer by creating the file 
+/etc/systemd/system/my-network-log.timer:
+► [Unit]
+Description=Run the network logging service on boot
+[Timer]
+OnActiveSec=5min
+Unit=my-network-log.service
+[Install]
+WantedBy=timers.target
+
+sudo systemctl list-timers
+=> List current active timers
+
+======= Bonus: Timers in systemd ========
+
+► We can see the date format:
+► systemd-analyze timestamp now
+► Example:
+► [Timer]
+OnCalendar=*-*-* *:0,15,30,45
+► We can use systemd-analyze to help us analyze the 
+placeholders in the calendar format:
+► systemd-analyze calendar '*-*-* *:0,15,30,45'
+
+======== systemd-journald: Introduction ======
+► Display all logs: journalctl
+► Important parameters:
+► Only show current boot: journalctl -b
+► Show all available boots: journalctl --list-boots
+► Filter by unit: journalctl -u <unit>
+► Filter by time range: 
+► journalctl --since "<time>" --until "<time>"
+► Reverse output: journalctl -r
+► Follow logs in real-time: journalctl -f
+► We can also send a message into the journalctl log:
+► echo 'message' | systemd-cat
+
+===== Managing partitions on the CLI: parted ====
+► We can do this with the command: sudo parted
+select /dev/sdb
+=> Select the target device
+or using:
+sudo parted /dev/sdb
+name 1
+=> Rename the partition 1 in the lelected device
+
+==== Creating the filesystem =====
+► mkfs.ext4 /dev/sdb1
+
+========================== Copy files =====================================
+
+ssh jayce@34.87.188.70 'find /home/jayce/aws_projects/devops-projects/01-jenkins-setup -type f ! -path "*/.terraform/*" ! -name "*.zip" ! -name "*.tar.gz"' | \
+    xargs -I {} scp jayce@34.87.188.70:{} /home/jayce/project/DevOps-Project
+
+
+
+rsync -avz --exclude='.terraform/' --exclude='*.zip' --exclude='*.tar.gz' jayce@34.87.188.70:/home/jayce/aws_projects/devops-projects/01-jenkins-setup /home/jayce/project/DevOps-Project
