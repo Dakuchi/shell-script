@@ -34,3 +34,12 @@ sometext
 # ouput formatting
 echo -e "Name\t\tNumber"; echo -e "Jayce\t\t123"                    # seperate with tab
 echo -e "This text\nbreack over\nthree lines"                        # seperate with newline
+
+# text process with awk
+awk '{print NR, $0}' output.text 									# return line number and entire line of output.text
+awk '$2>4{print $2}' output.txt 									# return the second fields has value > 4
+awk '{ sum +=$2 } END { print sum }' output.txt 					# return the sum of second fields value
+
+# text extract using cut
+cut -d ',' -f 1,2 output.txt										# extract the first and second field seperated by the delimiter ','
+cut -c 1-7 output.txt 												# extract the character from 1 to 7
