@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 username="jayce" 
 if id "$username" &>/dev/null; then 
