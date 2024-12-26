@@ -6,3 +6,8 @@ rsync -avz -e ssh /path/to/source username@remote_host:/path/to/dest			# sync us
 rsync -avz --exclude '*.txt' /path/to/source/ /path/to/dest						# sync but exclude specific files
 rsync -avz -n /path/to/source /path/to/dest 									# simulate sync but not make any changes
 
+#========================================#
+#!/usr/bin/env bash
+while read f; do
+	echo "I read a line and it says: $f"
+done < textfile.txt

@@ -1361,3 +1361,16 @@ ssh jayce@34.87.188.70 'find /home/jayce/aws_projects/devops-projects/01-jenkins
 
 
 rsync -avz --exclude='.terraform/' --exclude='*.zip' --exclude='*.tar.gz' jayce@34.87.188.70:/home/jayce/aws_projects/devops-projects/01-jenkins-setup /home/jayce/project/DevOps-Project
+
+========================= Add command to deal with error ================
+set -euxo pipefail
+-e causes the script to exit immediately if any command returns a non-zero exit status (i.e., if a command fails).
+-u makes the script exit if it tries to use an uninitialized (unset) variable.
+-x printed to the standard error before execution.
+-o pipefail: ensures that the exit status of a pipeline is the first non-zero exit status from any command in the pipeline, or zero if all commands succeed. 
+
+# make sure bash version is matched before executing the script
+[[ ! $BASH_VERSION -ge 5 ]] && echo "You will need to update to bash 5+." && exit
+
+# make sure necessary tools are available before executing script
+[[ ! -a $(which nmap) ]] && echo "This script uses Nmap, which was not found on this system." && exit
